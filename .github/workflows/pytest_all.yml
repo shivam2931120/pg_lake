@@ -93,7 +93,7 @@ jobs:
 
     strategy:
       matrix:
-        pg_version: [16, 17, 18]
+        pg_version: [16, 17, 18, 19]
 
     steps:
       - uses: actions/checkout@v4
@@ -118,7 +118,7 @@ jobs:
 
     strategy:
       matrix:
-        pg_version: [16, 17, 18]
+        pg_version: [16, 17, 18, 19]
 
     steps:
       - uses: actions/checkout@v4
@@ -151,7 +151,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg_version: [17, 18]
+        pg_version: [17, 18, 19]
         test_make_target:
           - 'check-duckdb_pglake'
           - 'check-avro'
@@ -189,7 +189,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg_version: [17, 18]
+        pg_version: [17, 18, 19]
         test_make_target:
           - 'check-pg_lake_table'
         # helps splitting tests into 5 parallel jobs
@@ -257,7 +257,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg_version: [16, 17, 18]
+        pg_version: [16, 17, 18, 19]
         test_make_target:
           - 'installcheck-postgres'
           - 'installcheck-postgres-with_extensions_created'
@@ -329,7 +329,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg_version: [17, 18]
+        pg_version: [17, 18, 19]
         test_make_target:
           - 'check-isolation_pg_lake_table'
 
@@ -358,7 +358,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg_version_pairs: ["16-17", "17-18", "16-18"]
+        pg_version_pairs: ["16-17", "17-18", "16-18", "17-19", "18-19", "16-19"]
         test_make_target:
           - 'check-pg_lake_table-upgrade'
 
