@@ -12,7 +12,8 @@ ENV PG_LAKE_REF=main
 ARG PG16_VERSION=16.14
 ARG PG17_VERSION=17.10
 ARG PG18_VERSION=18.4
-ARG PG19_VERSION=19beta1
+ARG PG19_VERSION=master
+ARG PG19_GIT_REPO=https://github.com/postgres/postgres.git
 ARG POSTGIS_VERSION=3.6.0
 ARG PGAUDIT16_VERSION=REL_16_STABLE
 ARG PGAUDIT17_VERSION=REL_17_STABLE
@@ -30,6 +31,7 @@ RUN if [ "$BASE_IMAGE_OS" = "almalinux" ]; then \
             ninja-build \
             wget \
             git \
+            autoconf \
             readline-devel \
             zlib-devel \
             flex \
@@ -75,6 +77,7 @@ RUN if [ "$BASE_IMAGE_OS" = "debian" ]; then \
         apt-get update \
         && apt-get install -y \
             build-essential \
+            autoconf \
             cmake \
             ninja-build \
             libreadline-dev \
@@ -163,7 +166,7 @@ WORKDIR /home/postgres
 RUN wget https://ftp.postgresql.org/pub/source/v$PG16_VERSION/postgresql-$PG16_VERSION.tar.gz && \
     wget https://ftp.postgresql.org/pub/source/v$PG17_VERSION/postgresql-$PG17_VERSION.tar.gz && \
     wget https://ftp.postgresql.org/pub/source/v$PG18_VERSION/postgresql-$PG18_VERSION.tar.gz && \
-    wget https://ftp.postgresql.org/pub/source/v$PG19_VERSION/postgresql-$PG19_VERSION.tar.gz && \
+    git clone --depth 1 --branch $PG19_VERSION $PG19_GIT_REPO postgresql-$PG19_VERSION && \
     wget https://download.osgeo.org/postgis/source/postgis-$POSTGIS_VERSION.tar.gz && \
     wget https://github.com/pgaudit/pgaudit/archive/refs/heads/$PGAUDIT16_VERSION.tar.gz && \
     wget https://github.com/pgaudit/pgaudit/archive/refs/heads/$PGAUDIT17_VERSION.tar.gz && \
@@ -172,7 +175,6 @@ RUN wget https://ftp.postgresql.org/pub/source/v$PG16_VERSION/postgresql-$PG16_V
     tar -xzf postgresql-$PG16_VERSION.tar.gz && rm postgresql-$PG16_VERSION.tar.gz && \
     tar -xzf postgresql-$PG17_VERSION.tar.gz && rm postgresql-$PG17_VERSION.tar.gz && \
     tar -xzf postgresql-$PG18_VERSION.tar.gz && rm postgresql-$PG18_VERSION.tar.gz && \
-    tar -xzf postgresql-$PG19_VERSION.tar.gz && rm postgresql-$PG19_VERSION.tar.gz && \
     tar -xzf $PGAUDIT16_VERSION.tar.gz && rm $PGAUDIT16_VERSION.tar.gz && \
     tar -xzf $PGAUDIT17_VERSION.tar.gz && rm $PGAUDIT17_VERSION.tar.gz && \
     tar -xzf $PGAUDIT18_VERSION.tar.gz && rm $PGAUDIT18_VERSION.tar.gz && \
@@ -225,7 +227,10 @@ RUN cd postgresql-$PG18_VERSION && \
     cd .. && rm -rf postgresql-$PG18_VERSION*
 
 # Compile and install PostgreSQL 19 with pgindent
+# PG19 is built from a git clone of postgres/postgres master, so we must
+# generate the configure script with autoconf before building.
 RUN cd postgresql-$PG19_VERSION && \
+    autoconf && \
     ./configure --prefix=$PGBASEDIR/pgsql-19 $PG_COMPILE_FLAGS_19 && \
     make -j `nproc` && make install && \
     make -C src/test/isolation install && \
